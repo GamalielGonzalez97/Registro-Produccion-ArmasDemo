@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f3f5f2" />
+    <title>Control de Producción</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a
+          class="brand"
+          href="#inicio"
+          aria-label="Control de Producción, inicio"
+        >
+          <span class="brand-mark" aria-hidden="true"
+            ><span></span><span></span><span></span
+          ></span>
+          <span class="brand-name">Control<span> / </span>Producción</span>
+        </a>
+        <div class="plant-label">
+          <span class="status-dot"></span> PLANTA AUTOMOTRIZ
+          <span class="label-divider">/</span> LÍNEA 01
+        </div>
+      </header>
+
+      <main id="inicio">
+        <section class="page-heading" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">
+              REGISTRO DE JORNADA <span>·</span> PRODUCCIÓN DIARIA
+            </p>
+            <h1 id="page-title">
+              Control de <span>Producción Grupo Armas Demo</span>
+            </h1>
+            <p class="heading-note">
+              Seguimiento por hora de piezas conformes y material de scrap.
+            </p>
+          </div>
+          <div class="date-block">
+            <span class="date-label">FECHA DE JORNADA</span>
+            <time id="journey-date"></time>
+          </div>
+        </section>
+
+        <section class="shift-bar" aria-label="Configuración del turno">
+          <div class="shift-select-wrap">
+            <label for="shift-select">Turno</label>
+            <select id="shift-select">
+              <option value="manana">Mañana · 07:00–15:00</option>
+              <option value="tarde">Tarde · 15:00–23:00</option>
+              <option value="noche">Noche · 23:00–07:00</option>
+            </select>
+          </div>
+          <p class="shift-caption" id="shift-caption">
+            8 franjas horarias <span>·</span> 07:00–15:00
+          </p>
+          <button class="button button-clear" id="clear-day" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+            </svg>
+            Finalizar y limpiar jornada
+          </button>
+        </section>
+
+        <section class="metrics" aria-label="Resumen de producción">
+          <article class="metric metric-good">
+            <div class="metric-top">
+              <span>Piezas buenas</span
+              ><span class="metric-icon icon-check" aria-hidden="true">✓</span>
+            </div>
+            <strong id="total-good">0</strong>
+            <span class="metric-foot">PIEZAS CONFORMES</span>
+          </article>
+          <article class="metric metric-scrap">
+            <div class="metric-top">
+              <span>Total scrap</span
+              ><span class="metric-icon icon-scrap" aria-hidden="true">!</span>
+            </div>
+            <strong id="total-scrap">0</strong>
+            <span class="metric-foot">PIEZAS NO CONFORMES</span>
+          </article>
+          <article class="metric metric-total">
+            <div class="metric-top">
+              <span>Total registrado</span
+              ><span class="metric-icon icon-total" aria-hidden="true">▦</span>
+            </div>
+            <strong id="total-produced">0</strong>
+            <span class="metric-foot">BUENAS + SCRAP</span>
+          </article>
+          <article class="metric metric-rate">
+            <div class="metric-top">
+              <span>Porcentaje de scrap</span
+              ><span class="metric-icon icon-rate" aria-hidden="true">%</span>
+            </div>
+            <strong id="scrap-rate"
+              >0<span class="percent-sign">%</span></strong
+            >
+            <div class="rate-track" aria-hidden="true">
+              <span id="scrap-bar"></span>
+            </div>
+          </article>
+        </section>
+
+        <section class="production-section" aria-labelledby="production-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">DETALLE DE PRODUCCIÓN</p>
+              <h2 id="production-title">Registro por hora</h2>
+            </div>
+            <span class="section-count" id="entry-count"
+              >0 de 8 horas registradas</span
+            >
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">HORA</th>
+                  <th scope="col">PIEZAS BUENAS</th>
+                  <th scope="col">SCRAP</th>
+                  <th scope="col">TOTAL</th>
+                  <th scope="col"><span class="sr-only">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="hour-rows"></tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row">TOTAL JORNADA</th>
+                  <td id="table-good">0</td>
+                  <td id="table-scrap">0</td>
+                  <td id="table-produced">0</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <p class="table-note">
+            <span class="note-mark">i</span> Los registros se guardan
+            automáticamente en este dispositivo.
+          </p>
+        </section>
+
+        <footer class="page-footer">
+          <span
+            >CONTROL DE PRODUCCIÓN
+            <span class="footer-separator">/</span> REGISTRO INTERNO</span
+          ><span>JORNADA DE 8 HORAS</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="confirm-dialog" aria-labelledby="dialog-title">
+      <form method="dialog" class="dialog-content">
+        <span class="dialog-symbol" aria-hidden="true">!</span>
+        <p class="eyebrow">FINALIZAR TURNO</p>
+        <h2 id="dialog-title">¿Limpiar esta jornada?</h2>
+        <p>
+          Se eliminarán los registros de este turno y fecha de este dispositivo.
+          Esta acción no se puede deshacer.
+        </p>
+        <div class="dialog-actions">
+          <button class="button button-secondary" value="cancel">
+            Cancelar
+          </button>
+          <button
+            class="button button-danger"
+            id="confirm-clear"
+            value="confirm"
+          >
+            Finalizar y limpiar
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
