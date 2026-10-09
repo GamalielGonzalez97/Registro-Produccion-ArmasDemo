@@ -6,11 +6,13 @@ const shiftDefinitions = {
 
 const storageKey = "control-produccion-jornadas-v1";
 const rowsElement = document.querySelector("#hour-rows");
+const lineSelect = document.querySelector("#line-select");
 const shiftSelect = document.querySelector("#shift-select");
 const dateElement = document.querySelector("#journey-date");
 const dialog = document.querySelector("#confirm-dialog");
 let editingHour = null;
 let journeys = loadJourneys();
+let activeLine = lineSelect.value;
 let activeShift = shiftSelect.value;
 let activeDate = getJourneyDate(activeShift);
 
@@ -30,7 +32,8 @@ function getJourneyDate(shift, now = new Date()) {
 }
 
 function getJourneyKey() {
-  return `${activeDate}:${activeShift}`;
+  const journeyKey = `${activeDate}:${activeShift}`;
+  return activeLine === "linea-01" ? journeyKey : `${journeyKey}:${activeLine}`;
 }
 
 function getEntries() {
@@ -53,6 +56,7 @@ function getTimeRange(hourIndex) {
 function render() {
   const shift = shiftDefinitions[activeShift];
   const entries = getEntries();
+  document.querySelector("#active-line-label").textContent = lineSelect.selectedOptions[0].text.toUpperCase();
   const [year, month, day] = activeDate.split("-").map(Number);
   const date = new Date(year, month - 1, day);
   dateElement.dateTime = activeDate;
@@ -95,6 +99,12 @@ function renderRow(index, entry) {
 shiftSelect.addEventListener("change", () => {
   activeShift = shiftSelect.value;
   activeDate = getJourneyDate(activeShift);
+  editingHour = null;
+  render();
+});
+
+lineSelect.addEventListener("change", () => {
+  activeLine = lineSelect.value;
   editingHour = null;
   render();
 });

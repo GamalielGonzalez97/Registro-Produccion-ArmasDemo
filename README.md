@@ -6,6 +6,7 @@ Aplicación web de demostración para registrar y consultar la producción de un
 
 - Registro de piezas buenas y scrap en 8 franjas horarias.
 - Selección de turno: mañana (07:00–15:00), tarde (15:00–23:00) y noche (23:00–07:00).
+- Selección de línea de producción (Línea 01 a Línea 20), con registros independientes por línea.
 - Resumen automático de piezas buenas, scrap, producción total y porcentaje de scrap.
 - Edición y eliminación de registros por hora.
 - Fecha de jornada asociada al turno; el turno nocturno considera el cambio de día.

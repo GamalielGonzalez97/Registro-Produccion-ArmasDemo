@@ -48,6 +48,7 @@ h1 > span { color: var(--green); }
 .date-block time { font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; text-transform: capitalize; }
 .shift-bar { min-height: 70px; padding: 12px 16px; display: flex; align-items: center; gap: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
 .shift-select-wrap { display: flex; align-items: center; gap: 12px; }
+.shift-select-wrap label { white-space: nowrap; }
 .shift-select-wrap label { color: var(--muted); font-size: 12px; font-weight: 600; }
 select { width: 235px; min-height: 42px; padding: 0 34px 0 12px; border: 1px solid #dce3de; border-radius: 5px; background: #fff; color: var(--ink); font-size: 12px; font-weight: 700; cursor: pointer; }
 .shift-caption { margin: 0; color: var(--muted); font-size: 11px; }
