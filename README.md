@@ -13,6 +13,22 @@ Aplicación web de demostración para registrar y consultar la producción de un
 - Guardado automático en el almacenamiento local del navegador (`localStorage`).
 - Diseño adaptable a pantallas de escritorio y móviles.
 - Confirmación antes de limpiar los registros de la jornada seleccionada.
+- Registro de tipo de defecto asociado a cada hora de scrap para identificar la causa de la no conformidad.
+
+## Cambios recientes
+
+### 2026-10-12 — Tipo de defecto por hora
+
+Se incorporó una nueva columna en el registro para indicar la causa del defecto cuando hay piezas no conformes. Las opciones disponibles son:
+
+- Sin defecto
+- Desalineación
+- Rayado
+- Soldadura
+- Material defectuoso
+- Ajuste de operación
+
+Esto permite que el sistema no solo registre la cantidad, sino también la categoría del problema, lo que ayuda a detectar patrones de calidad por turno o línea.
 
 ## Ejecutar la demo
 
@@ -24,6 +40,39 @@ No requiere instalación de dependencias ni servidor. Abre `index.html` directam
 - CSS
 - JavaScript sin frameworks
 - `localStorage` para conservar los registros en el dispositivo
+
+## Git y control de versiones
+
+El proyecto se trabaja en Git para llevar un historial de cambios. Cada mejora importante se recomienda guardar con un commit descriptivo.
+
+Ejemplo:
+
+```bash
+git status
+git add .
+git commit -m "feat: agregar tipo de defecto al registro"
+git push origin main
+```
+
+Si en algún momento quieres deshacer una mejora, puedes volver a una versión anterior con:
+
+```bash
+git log --oneline
+```
+
+Y luego:
+
+```bash
+git checkout <hash-del-commit>
+```
+
+O si ya quieres volver al estado actual de una rama remota:
+
+```bash
+git reset --hard HEAD~1
+```
+
+> Importante: usa `git reset --hard` con cuidado, porque borra cambios locales no guardados.
 
 ## Alcance y limitaciones
 
