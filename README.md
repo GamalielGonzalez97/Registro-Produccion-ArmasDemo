@@ -2,6 +2,13 @@
 
 Aplicación web de demostración para registrar y consultar la producción de una planta automotriz durante una jornada de trabajo. Permite capturar, por cada hora del turno, la cantidad de piezas conformes y las piezas no conformes (scrap).
 
+## Avance del proyecto
+
+- [x] **Paso 1 — Registro de producción:** turnos, fecha, 8 franjas por jornada, captura de piezas buenas y scrap, totales, edición, eliminación y guardado local.
+- [x] **Paso 2 — Clasificación de scrap:** selección del tipo de defecto en cada hora, visible en la tabla y conservada al editar o recargar.
+- [x] **Mejora móvil:** campos numéricos y selector de defecto con controles grandes y diseño adaptable.
+- [ ] **Paso 3 — Pendiente de definir:** acordar el siguiente alcance antes de implementarlo.
+
 ## Funcionalidades
 
 - Registro de piezas buenas y scrap en 8 franjas horarias.
@@ -17,9 +24,9 @@ Aplicación web de demostración para registrar y consultar la producción de un
 
 ## Cambios recientes
 
-### 2026-10-12 — Tipo de defecto por hora
+### 2026-10-14 — Paso 2: clasificación de scrap por hora
 
-Se incorporó una nueva columna en el registro para indicar la causa del defecto cuando hay piezas no conformes. Las opciones disponibles son:
+Cada franja horaria permite seleccionar la causa del scrap. Las opciones disponibles son:
 
 - Sin defecto
 - Desalineación
@@ -28,7 +35,7 @@ Se incorporó una nueva columna en el registro para indicar la causa del defecto
 - Material defectuoso
 - Ajuste de operación
 
-Esto permite que el sistema no solo registre la cantidad, sino también la categoría del problema, lo que ayuda a detectar patrones de calidad por turno o línea.
+La categoría se guarda junto con las cantidades de la hora y permanece disponible al editar el registro.
 
 ## Ejecutar la demo
 

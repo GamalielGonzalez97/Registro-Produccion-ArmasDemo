@@ -526,6 +526,25 @@ tbody td {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
+.hour-form .hour-field-defect {
+  flex: 1 1 150px;
+}
+.hour-form .hour-field-defect select {
+  width: 100%;
+  min-width: 0;
+  min-height: 35px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+.defect-badge {
+  display: inline-block;
+  padding: 5px 7px;
+  border-radius: 4px;
+  background: #f4f2e8;
+  color: #78683a;
+  font-size: 10px;
+  font-weight: 600;
+}
 .hour-form input::placeholder {
   color: #aab4ae;
 }
@@ -761,7 +780,7 @@ dialog::backdrop {
     height: auto;
     display: grid;
     grid-template-columns: 1fr 1fr auto;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
     align-items: center;
     padding: 11px 12px 10px;
     border: 1px solid var(--line);
@@ -790,11 +809,15 @@ dialog::backdrop {
     grid-row: 2;
   }
   tbody td:nth-of-type(3) {
+    grid-column: 1 / 3;
+    grid-row: 3;
+  }
+  tbody td:nth-of-type(4) {
     display: none;
   }
   tbody td:last-child {
     grid-column: 3;
-    grid-row: 1 / 3;
+    grid-row: 1 / 4;
     justify-self: end;
   }
   tbody td:nth-of-type(1)::before,
@@ -824,6 +847,9 @@ dialog::backdrop {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px 9px;
   }
+  tbody td[colspan="3"] + .total-cell {
+    display: none;
+  }
   tbody .hour-field {
     gap: 6px;
     color: #718079;
@@ -835,12 +861,19 @@ dialog::backdrop {
     grid-template-columns: minmax(0, 1fr) 48px;
     gap: 8px;
   }
+  tbody .hour-form .hour-field-defect {
+    grid-column: 1 / -1;
+  }
   tbody .hour-form input {
     width: 100%;
     min-width: 0;
     height: 48px;
     padding: 0 12px;
     border-radius: 6px;
+    font-size: 16px;
+  }
+  tbody .hour-form .hour-field-defect select {
+    height: 48px;
     font-size: 16px;
   }
   tbody .hour-form .button-save,
@@ -880,7 +913,11 @@ dialog::backdrop {
     text-align: left;
     font-size: 8px;
   }
-  tfoot td:last-of-type {
+  tfoot td[aria-hidden="true"],
+  tfoot td:last-child {
+    display: none;
+  }
+  #table-produced {
     color: var(--green);
   }
   .section-heading {

@@ -4,6 +4,16 @@ const shiftDefinitions = {
   noche: { label: "Noche", start: 23 },
 };
 
+const defectOptions = [
+  { value: "sin-defecto", label: "Sin defecto" },
+  { value: "desalineacion", label: "Desalineación" },
+  { value: "rayado", label: "Rayado" },
+  { value: "soldadura", label: "Soldadura" },
+  { value: "material", label: "Material defectuoso" },
+  { value: "operacion", label: "Ajuste de operación" },
+];
+const defaultDefectType = defectOptions[0].value;
+
 const storageKey = "control-produccion-jornadas-v1";
 const rowsElement = document.querySelector("#hour-rows");
 const lineSelect = document.querySelector("#line-select");
@@ -63,6 +73,13 @@ function getTimeRange(hourIndex) {
   };
 }
 
+function getDefectLabel(type) {
+  return (
+    defectOptions.find((option) => option.value === type)?.label ||
+    defectOptions[0].label
+  );
+}
+
 function render() {
   const shift = shiftDefinitions[activeShift];
   const entries = getEntries();
@@ -118,12 +135,25 @@ function renderRow(index, entry) {
   const range = getTimeRange(index);
   const hourLabel = `<span class="hour-index">${String(index + 1).padStart(2, "0")}</span><span class="hour-period">${range.start}–${range.end}</span>${range.nextDay ? '<span class="next-day">DÍA SIGUIENTE</span>' : ""}`;
   const rowHeader = `<th scope="row">${hourLabel}</th>`;
+  const defectType = defectOptions.some(
+    (option) => option.value === entry?.defectType,
+  )
+    ? entry.defectType
+    : defaultDefectType;
+  const defectLabel = getDefectLabel(defectType);
   if (editingHour === index || !entry) {
-    return `<tr>${rowHeader}<td colspan="3"><form class="hour-form" data-hour="${index}"><label class="hour-field"><span>Buenas</span><input name="good" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" placeholder="0" aria-label="Piezas buenas, hora ${index + 1}" value="${entry ? entry.good : ""}" required></label><label class="hour-field"><span>Scrap</span><input name="scrap" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="done" placeholder="0" aria-label="Piezas scrap, hora ${index + 1}" value="${entry ? entry.scrap : ""}" required></label><div class="hour-form-actions"><button class="button button-save" type="submit">Guardar</button>${entry ? '<button class="button button-cancel" type="button" data-action="cancel" aria-label="Cancelar edición">×</button>' : ""}</div></form></td><td class="total-cell">${entry ? (entry.good + entry.scrap).toLocaleString("es") : "—"}</td></tr>`;
+    const form = `<form class="hour-form" data-hour="${index}">
+      <label class="hour-field"><span>Buenas</span><input name="good" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" placeholder="0" aria-label="Piezas buenas, hora ${index + 1}" value="${entry?.good ?? ""}" required></label>
+      <label class="hour-field"><span>Scrap</span><input name="scrap" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="done" placeholder="0" aria-label="Piezas scrap, hora ${index + 1}" value="${entry?.scrap ?? ""}" required></label>
+      <label class="hour-field hour-field-defect"><span>Tipo de defecto</span><select name="defectType" aria-label="Tipo de defecto, hora ${index + 1}">${defectOptions.map((option) => `<option value="${option.value}" ${option.value === defectType ? "selected" : ""}>${option.label}</option>`).join("")}</select></label>
+      <div class="hour-form-actions"><button class="button button-save" type="submit">Guardar</button>${entry ? '<button class="button button-cancel" type="button" data-action="cancel" aria-label="Cancelar edición">×</button>' : ""}</div>
+    </form>`;
+    const total = entry ? (entry.good + entry.scrap).toLocaleString("es") : "—";
+    return `<tr>${rowHeader}<td colspan="3">${form}</td><td class="total-cell">${total}</td><td></td></tr>`;
   }
 
   const total = entry.good + entry.scrap;
-  return `<tr>${rowHeader}<td>${entry.good.toLocaleString("es")}</td><td>${entry.scrap.toLocaleString("es")}</td><td class="total-cell">${total.toLocaleString("es")}</td><td><div class="row-actions"><button class="icon-button" type="button" data-action="edit" data-hour="${index}" aria-label="Editar hora ${index + 1}" title="Editar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l4.3-.9L19 8.4 15.6 5 4.9 15.7 4 20Z"/></svg></button><button class="icon-button delete" type="button" data-action="delete" data-hour="${index}" aria-label="Eliminar hora ${index + 1}" title="Eliminar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div></td></tr>`;
+  return `<tr>${rowHeader}<td>${entry.good.toLocaleString("es")}</td><td>${entry.scrap.toLocaleString("es")}</td><td><span class="defect-badge">${defectLabel}</span></td><td class="total-cell">${total.toLocaleString("es")}</td><td><div class="row-actions"><button class="icon-button" type="button" data-action="edit" data-hour="${index}" aria-label="Editar hora ${index + 1}" title="Editar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l4.3-.9L19 8.4 15.6 5 4.9 15.7 4 20Z"/></svg></button><button class="icon-button delete" type="button" data-action="delete" data-hour="${index}" aria-label="Eliminar hora ${index + 1}" title="Eliminar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div></td></tr>`;
 }
 
 shiftSelect.addEventListener("change", () => {
@@ -146,16 +176,21 @@ rowsElement.addEventListener("submit", (event) => {
   const formData = new FormData(form);
   const good = Number(formData.get("good"));
   const scrap = Number(formData.get("scrap"));
+  const defectType = formData.get("defectType");
   if (
     !Number.isSafeInteger(good) ||
     !Number.isSafeInteger(scrap) ||
     good < 0 ||
-    scrap < 0
+    scrap < 0 ||
+    !defectOptions.some((option) => option.value === defectType)
   ) {
     form.reportValidity();
     return;
   }
-  const entries = { ...getEntries(), [form.dataset.hour]: { good, scrap } };
+  const entries = {
+    ...getEntries(),
+    [form.dataset.hour]: { good, scrap, defectType },
+  };
   journeys[getJourneyKey()] = entries;
   saveJourneys();
   editingHour = null;
