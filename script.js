@@ -80,6 +80,85 @@ function getDefectLabel(type) {
   );
 }
 
+function renderAnalysis(entries) {
+  const summary = productionCalculations.calculateJourneySummary(entries);
+  const defectBreakdown = productionCalculations.calculateDefectBreakdown(entries);
+  const defectList = document.querySelector("#defect-list");
+  const hourBandList = document.querySelector("#hour-band-list");
+  const highlight = document.querySelector("#turno-highlight");
+
+  if (!defectBreakdown.length) {
+    defectList.innerHTML = '<li class="empty-state">Sin scrap registrado</li>';
+    highlight.textContent = summary.total > 0
+      ? `Calidad estable en ${summary.total.toLocaleString("es")} piezas registradas.`
+      : "Sin producción registrada";
+    hourBandList.innerHTML = Array.from({ length: 8 }, (_, index) => {
+      const entry = entries[index];
+      const total = entry ? entry.good + entry.scrap : 0;
+      return `
+        <div class="hour-band-item">
+          <div class="hour-band-meta">
+            <span>H${String(index + 1).padStart(2, "0")}</span>
+            <strong>${total.toLocaleString("es")}</strong>
+          </div>
+          <div class="hour-bar-track"><span style="width: ${Math.min((total / 200) * 100, 100)}%"></span></div>
+        </div>
+      `;
+    }).join("");
+    return;
+  }
+
+  const maxDefectCount = Math.max(...defectBreakdown.map((item) => item.count));
+  defectList.innerHTML = defectBreakdown
+    .slice(0, 4)
+    .map(
+      (item) => `
+        <li>
+          <div class="defect-row">
+            <span>${item.label}</span>
+            <strong>${item.count.toLocaleString("es")}</strong>
+          </div>
+          <div class="defect-bar-track"><span style="width: ${Math.max((item.count / maxDefectCount) * 100, 12)}%"></span></div>
+          <small>${item.share}% del scrap</small>
+        </li>
+      `,
+    )
+    .join("");
+
+  const strongestHour = Array.from({ length: 8 }, (_, index) => {
+    const entry = entries[index];
+    if (!entry) return null;
+    const total = entry.good + entry.scrap;
+    const qualityRate = total === 0 ? 0 : (entry.good / total) * 100;
+    return { index, qualityRate, total };
+  })
+    .filter(Boolean)
+    .sort((a, b) => b.qualityRate - a.qualityRate)[0];
+
+  if (strongestHour) {
+    highlight.textContent = `Máxima calidad en H${String(strongestHour.index + 1).padStart(2, "0")}: ${Math.round(strongestHour.qualityRate)}% conformes.`;
+  } else {
+    highlight.textContent = `Calidad estable en ${summary.total.toLocaleString("es")} piezas registradas.`;
+  }
+
+  hourBandList.innerHTML = Array.from({ length: 8 }, (_, index) => {
+    const entry = entries[index];
+    const total = entry ? entry.good + entry.scrap : 0;
+    const ratio = Math.min((total / 220) * 100, 100);
+    const defectCount = entry ? entry.scrap : 0;
+    return `
+      <div class="hour-band-item">
+        <div class="hour-band-meta">
+          <span>H${String(index + 1).padStart(2, "0")}</span>
+          <strong>${total.toLocaleString("es")}</strong>
+        </div>
+        <div class="hour-bar-track"><span style="width: ${ratio}%"></span></div>
+        <small>${defectCount} scrap</small>
+      </div>
+    `;
+  }).join("");
+}
+
 function render() {
   const shift = shiftDefinitions[activeShift];
   const entries = getEntries();
@@ -129,6 +208,8 @@ function render() {
     totals.scrap.toLocaleString("es");
   document.querySelector("#table-produced").textContent =
     produced.toLocaleString("es");
+
+  renderAnalysis(entries);
 }
 
 function renderRow(index, entry) {

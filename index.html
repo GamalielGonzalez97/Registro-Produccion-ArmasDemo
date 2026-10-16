@@ -12,6 +12,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
+    <script src="app-logic.js"></script>
     <script src="script.js" defer></script>
   </head>
   <body>
@@ -135,6 +136,29 @@
               <span id="scrap-bar"></span>
             </div>
           </article>
+        </section>
+
+        <section class="analysis-panel" aria-labelledby="analysis-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">ANÁLISIS DEL TURNO</p>
+              <h2 id="analysis-title">Desglose de calidad</h2>
+            </div>
+          </div>
+          <div class="analysis-grid">
+            <article class="analysis-card insight-card">
+              <p class="analysis-label">OBSERVACIÓN</p>
+              <strong id="turno-highlight">Sin producción registrada</strong>
+            </article>
+            <article class="analysis-card">
+              <h3>Defectos más frecuentes</h3>
+              <ul id="defect-list" class="defect-list"></ul>
+            </article>
+            <article class="analysis-card wide-card">
+              <h3>Rendimiento por hora</h3>
+              <div id="hour-band-list" class="hour-band-list"></div>
+            </article>
+          </div>
         </section>
 
         <section class="production-section" aria-labelledby="production-title">
