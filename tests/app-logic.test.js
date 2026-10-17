@@ -7,7 +7,7 @@ const {
 } = require("../app-logic.js");
 
 const entries = {
-  0: { good: 120, scrap: 10, defectType: "desalineacion" },
+  0: { good: 120, scrap: 10, defectType: "" },
   1: { good: 90, scrap: 12, defectType: "rayado" },
   2: { good: 110, scrap: 0, defectType: "sin-defecto" },
   3: { good: 100, scrap: 20, defectType: "material" },
