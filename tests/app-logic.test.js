@@ -1,5 +1,10 @@
 const assert = require("node:assert/strict");
-const { calculateJourneySummary, calculateDefectBreakdown } = require("../app-logic.js");
+const {
+  calculateJourneySummary,
+  calculateDefectBreakdown,
+  calculateDowntimeMinutes,
+  calculateDowntimeSummary,
+} = require("../app-logic.js");
 
 const entries = {
   0: { good: 120, scrap: 10, defectType: "desalineacion" },
@@ -26,5 +31,21 @@ assert.equal(
   defectBreakdown.find((item) => item.label === "Desalineación")?.count,
   10,
 );
+
+assert.equal(calculateDowntimeMinutes("08:15", "09:00"), 45);
+assert.equal(calculateDowntimeMinutes("23:30", "00:15"), 45);
+assert.equal(calculateDowntimeMinutes("08:00", "08:00"), null);
+assert.equal(calculateDowntimeMinutes("25:00", "26:00"), null);
+
+const downtimeSummary = calculateDowntimeSummary([
+  { startTime: "08:15", endTime: "09:00", reason: "maquinaria" },
+  { startTime: "23:30", endTime: "00:15", reason: "maquinaria" },
+  { startTime: "10:00", endTime: "10:20", reason: "material" },
+  { startTime: "invalid", endTime: "10:30", reason: "material" },
+]);
+assert.equal(downtimeSummary.count, 3);
+assert.equal(downtimeSummary.totalMinutes, 110);
+assert.equal(downtimeSummary.byReason[0].label, "Falla de maquinaria");
+assert.equal(downtimeSummary.byReason[0].minutes, 90);
 
 console.log("app-logic tests passed");

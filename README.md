@@ -7,6 +7,7 @@ Aplicación web de demostración para registrar y consultar la producción de un
 - [x] **Paso 1 — Registro de producción:** turnos, fecha, 8 franjas por jornada, captura de piezas buenas y scrap, totales, edición, eliminación y guardado local.
 - [x] **Paso 2 — Clasificación de scrap:** selección del tipo de defecto en cada hora, visible en la tabla y conservada al editar o recargar.
 - [x] **Paso 3 — Análisis de turno:** resumen del rendimiento, desglose por defecto y comparación por hora para detectar tendencias de calidad.
+- [x] **Paso 4 — Registro de paros:** captura de horarios, causa, responsable y detalle, con duración total por jornada.
 - [x] **Mejora móvil:** campos numéricos y selector de defecto con controles grandes y diseño adaptable.
 
 ## Funcionalidades
@@ -21,8 +22,13 @@ Aplicación web de demostración para registrar y consultar la producción de un
 - Diseño adaptable a pantallas de escritorio y móviles.
 - Confirmación antes de limpiar los registros de la jornada seleccionada.
 - Registro de tipo de defecto asociado a cada hora de scrap para identificar la causa de la no conformidad.
+- Registro de paros de línea por jornada, con duración calculada, causa, responsable y detalle.
 
 ## Cambios recientes
+
+### 2026-10-16 — Paso 4: registro de paros
+
+Se agregó un registro de paros independiente de la producción por hora. Cada evento guarda inicio, fin, causa, responsable y detalle; el resumen calcula la duración acumulada y conserva los datos por fecha, turno y línea.
 
 ### 2026-10-15 — Paso 3: análisis de turno
 

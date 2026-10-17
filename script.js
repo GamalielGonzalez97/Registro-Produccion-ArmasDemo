@@ -15,13 +15,17 @@ const defectOptions = [
 const defaultDefectType = defectOptions[0].value;
 
 const storageKey = "control-produccion-jornadas-v1";
+const downtimeStorageKey = "control-produccion-paros-v1";
 const rowsElement = document.querySelector("#hour-rows");
 const lineSelect = document.querySelector("#line-select");
 const shiftSelect = document.querySelector("#shift-select");
 const dateElement = document.querySelector("#journey-date");
 const dialog = document.querySelector("#confirm-dialog");
+const downtimeForm = document.querySelector("#downtime-form");
+const downtimeList = document.querySelector("#downtime-list");
 let editingHour = null;
 let journeys = loadJourneys();
+let downtimeByJourney = loadDowntimeRecords();
 let activeLine = lineSelect.value;
 let activeShift = shiftSelect.value;
 let activeDate = getJourneyDate(activeShift);
@@ -29,6 +33,17 @@ let activeDate = getJourneyDate(activeShift);
 function loadJourneys() {
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    return saved && typeof saved === "object" && !Array.isArray(saved)
+      ? saved
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function loadDowntimeRecords() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(downtimeStorageKey) || "{}");
     return saved && typeof saved === "object" && !Array.isArray(saved)
       ? saved
       : {};
@@ -58,6 +73,15 @@ function getEntries() {
 
 function saveJourneys() {
   localStorage.setItem(storageKey, JSON.stringify(journeys));
+}
+
+function getDowntimeRecords() {
+  const records = downtimeByJourney[getJourneyKey()];
+  return Array.isArray(records) ? records : [];
+}
+
+function saveDowntimeRecords() {
+  localStorage.setItem(downtimeStorageKey, JSON.stringify(downtimeByJourney));
 }
 
 function formatTime(hour) {
@@ -159,6 +183,81 @@ function renderAnalysis(entries) {
   }).join("");
 }
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[character]);
+}
+
+function formatDuration(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  if (!hours) return `${remainingMinutes} min`;
+  return remainingMinutes ? `${hours} h ${remainingMinutes} min` : `${hours} h`;
+}
+
+function renderDowntime() {
+  const records = getDowntimeRecords();
+  const summary = productionCalculations.calculateDowntimeSummary(records);
+  document.querySelector("#downtime-total").textContent =
+    formatDuration(summary.totalMinutes);
+  document.querySelector("#downtime-count").textContent =
+    `${summary.count} ${summary.count === 1 ? "evento" : "eventos"}`;
+  const causeSummary = document.querySelector("#downtime-cause-summary");
+  causeSummary.innerHTML = summary.byReason
+    .map(
+      (item) => `
+        <span class="downtime-cause-item">
+          <strong>${escapeHtml(item.label)}</strong>
+          <span>${formatDuration(item.minutes)}</span>
+        </span>
+      `,
+    )
+    .join("");
+  causeSummary.hidden = summary.byReason.length === 0;
+
+  if (!records.length) {
+    downtimeList.innerHTML = '<li class="empty-state">Sin paros registrados</li>';
+    return;
+  }
+
+  downtimeList.innerHTML = records
+    .map((record) => {
+      const duration = productionCalculations.calculateDowntimeMinutes(
+        record.startTime,
+        record.endTime,
+      );
+      if (duration === null) return "";
+      const reason = productionCalculations.downtimeReasons.find(
+        (option) => option.value === record.reason,
+      )?.label || "Otro";
+      const additionalInfo = [record.responsible, record.details]
+        .filter(Boolean)
+        .map(escapeHtml)
+        .join(" · ");
+      return `
+        <li class="downtime-item">
+          <div class="downtime-interval">
+            <strong>${escapeHtml(record.startTime)}–${escapeHtml(record.endTime)}</strong>
+            <span>${formatDuration(duration)}</span>
+          </div>
+          <div class="downtime-description">
+            <strong>${escapeHtml(reason)}</strong>
+            ${additionalInfo ? `<small>${additionalInfo}</small>` : ""}
+          </div>
+          <button class="icon-button delete" type="button" data-downtime-action="delete" data-id="${escapeHtml(record.id)}" aria-label="Eliminar paro ${escapeHtml(record.startTime)} a ${escapeHtml(record.endTime)}" title="Eliminar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+          </button>
+        </li>
+      `;
+    })
+    .join("");
+}
+
 function render() {
   const shift = shiftDefinitions[activeShift];
   const entries = getEntries();
@@ -210,6 +309,7 @@ function render() {
     produced.toLocaleString("es");
 
   renderAnalysis(entries);
+  renderDowntime();
 }
 
 function renderRow(index, entry) {
@@ -242,6 +342,56 @@ shiftSelect.addEventListener("change", () => {
   activeDate = getJourneyDate(activeShift);
   editingHour = null;
   render();
+});
+
+downtimeForm.querySelector('[name="reason"]').innerHTML =
+  productionCalculations.downtimeReasons
+    .map((reason) => `<option value="${reason.value}">${reason.label}</option>`)
+    .join("");
+
+downtimeForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!downtimeForm.reportValidity()) return;
+
+  const formData = new FormData(downtimeForm);
+  const startTime = formData.get("startTime");
+  const endTime = formData.get("endTime");
+  const duration = productionCalculations.calculateDowntimeMinutes(
+    startTime,
+    endTime,
+  );
+  const endInput = downtimeForm.elements.endTime;
+  endInput.setCustomValidity(
+    duration === null ? "La hora de fin debe ser distinta y válida." : "",
+  );
+  if (!downtimeForm.reportValidity()) return;
+
+  const record = {
+    id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
+    startTime,
+    endTime,
+    reason: formData.get("reason"),
+    responsible: formData.get("responsible").trim(),
+    details: formData.get("details").trim(),
+  };
+  downtimeByJourney[getJourneyKey()] = [...getDowntimeRecords(), record];
+  saveDowntimeRecords();
+  downtimeForm.reset();
+  renderDowntime();
+});
+
+downtimeForm.elements.endTime.addEventListener("input", (event) => {
+  event.currentTarget.setCustomValidity("");
+});
+
+downtimeList.addEventListener("click", (event) => {
+  const button = event.target.closest('[data-downtime-action="delete"]');
+  if (!button) return;
+  downtimeByJourney[getJourneyKey()] = getDowntimeRecords().filter(
+    (record) => record.id !== button.dataset.id,
+  );
+  saveDowntimeRecords();
+  renderDowntime();
 });
 
 lineSelect.addEventListener("change", () => {
@@ -300,7 +450,9 @@ document
 document.querySelector("#confirm-clear").addEventListener("click", (event) => {
   event.preventDefault();
   delete journeys[getJourneyKey()];
+  delete downtimeByJourney[getJourneyKey()];
   saveJourneys();
+  saveDowntimeRecords();
   editingHour = null;
   dialog.close();
   render();

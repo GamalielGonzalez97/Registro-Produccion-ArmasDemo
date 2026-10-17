@@ -9,6 +9,16 @@
   ];
 
   const defaultDefectType = defectOptions[0].value;
+  const downtimeReasons = [
+    { value: "maquinaria", label: "Falla de maquinaria" },
+    { value: "material", label: "Falta de material" },
+    { value: "ajuste", label: "Ajuste o calibración" },
+    { value: "calidad", label: "Problema de calidad" },
+    { value: "cambio-modelo", label: "Cambio de modelo" },
+    { value: "personal", label: "Falta de personal" },
+    { value: "seguridad", label: "Seguridad" },
+    { value: "otro", label: "Otro" },
+  ];
 
   function getDefectLabel(type) {
     return (
@@ -78,12 +88,63 @@
       .sort((a, b) => b.count - a.count);
   }
 
+  function calculateDowntimeMinutes(startTime, endTime) {
+    const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+    if (!timePattern.test(startTime) || !timePattern.test(endTime)) return null;
+
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
+    const start = startHour * 60 + startMinute;
+    const end = endHour * 60 + endMinute;
+    const duration = (end - start + 1440) % 1440;
+    return duration > 0 ? duration : null;
+  }
+
+  function calculateDowntimeSummary(stoppages = []) {
+    const reasons = {};
+    let count = 0;
+    let totalMinutes = 0;
+
+    stoppages.forEach((stoppage) => {
+      if (!stoppage || typeof stoppage !== "object") return;
+      const duration = calculateDowntimeMinutes(
+        stoppage.startTime,
+        stoppage.endTime,
+      );
+      if (duration === null) return;
+
+      const reason = downtimeReasons.some(
+        (option) => option.value === stoppage.reason,
+      )
+        ? stoppage.reason
+        : "otro";
+      count += 1;
+      totalMinutes += duration;
+      reasons[reason] = (reasons[reason] || 0) + duration;
+    });
+
+    return {
+      count,
+      totalMinutes,
+      byReason: Object.entries(reasons)
+        .map(([value, minutes]) => ({
+          value,
+          label: downtimeReasons.find((option) => option.value === value).label,
+          minutes,
+        }))
+        .sort((a, b) => b.minutes - a.minutes),
+    };
+  }
+
   const api = {
     defectOptions,
     defaultDefectType,
+    downtimeReasons,
     getDefectLabel,
     calculateJourneySummary,
     calculateDefectBreakdown,
+    calculateDowntimeMinutes,
+    calculateDowntimeSummary,
   };
 
   if (typeof module !== "undefined" && module.exports) {

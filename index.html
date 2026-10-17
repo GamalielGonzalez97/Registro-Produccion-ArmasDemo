@@ -202,6 +202,46 @@
           </p>
         </section>
 
+        <section class="downtime-section" aria-labelledby="downtime-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">DISPONIBILIDAD DE LÍNEA</p>
+              <h2 id="downtime-title">Registro de paros</h2>
+            </div>
+            <div class="downtime-totals" aria-live="polite">
+              <strong id="downtime-total">0 min</strong>
+              <span id="downtime-count">0 eventos</span>
+            </div>
+          </div>
+          <div id="downtime-cause-summary" class="downtime-cause-summary" aria-label="Tiempo de paro por causa"></div>
+          <form id="downtime-form" class="downtime-form">
+            <label class="downtime-field">
+              <span>Inicio</span>
+              <input name="startTime" type="time" required />
+            </label>
+            <label class="downtime-field">
+              <span>Fin</span>
+              <input name="endTime" type="time" required />
+            </label>
+            <label class="downtime-field downtime-reason-field">
+              <span>Causa</span>
+              <select name="reason" required></select>
+            </label>
+            <label class="downtime-field">
+              <span>Responsable</span>
+              <input name="responsible" type="text" maxlength="80" />
+            </label>
+            <label class="downtime-field downtime-detail-field">
+              <span>Detalle</span>
+              <input name="details" type="text" maxlength="160" />
+            </label>
+            <button class="button button-save downtime-submit" type="submit">
+              Registrar paro
+            </button>
+          </form>
+          <ul id="downtime-list" class="downtime-list" aria-live="polite"></ul>
+        </section>
+
         <footer class="page-footer">
           <span
             >CONTROL DE PRODUCCIÓN
