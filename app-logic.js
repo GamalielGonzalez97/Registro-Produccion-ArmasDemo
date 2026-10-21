@@ -51,6 +51,19 @@
     };
   }
 
+  function calculateTargetPerformance(good, target) {
+    if (!Number.isSafeInteger(good) || good < 0) {
+      throw new RangeError("La producción buena debe ser un entero no negativo.");
+    }
+    if (!Number.isSafeInteger(target) || target <= 0) return null;
+
+    return {
+      percentage: Number(((good / target) * 100).toFixed(1)),
+      remaining: Math.max(target - good, 0),
+      achieved: good >= target,
+    };
+  }
+
   function calculateDefectBreakdown(entries = {}) {
     const defectCounts = {};
     Object.values(entries).forEach((entry) => {
@@ -142,6 +155,7 @@
     downtimeReasons,
     getDefectLabel,
     calculateJourneySummary,
+    calculateTargetPerformance,
     calculateDefectBreakdown,
     calculateDowntimeMinutes,
     calculateDowntimeSummary,

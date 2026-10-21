@@ -16,6 +16,7 @@ const defaultDefectType = defectOptions[0].value;
 
 const storageKey = "control-produccion-jornadas-v1";
 const downtimeStorageKey = "control-produccion-paros-v1";
+const targetStorageKey = "control-produccion-metas-v1";
 const rowsElement = document.querySelector("#hour-rows");
 const lineSelect = document.querySelector("#line-select");
 const shiftSelect = document.querySelector("#shift-select");
@@ -23,9 +24,12 @@ const dateElement = document.querySelector("#journey-date");
 const dialog = document.querySelector("#confirm-dialog");
 const downtimeForm = document.querySelector("#downtime-form");
 const downtimeList = document.querySelector("#downtime-list");
+const targetForm = document.querySelector("#target-form");
+const targetInput = document.querySelector("#production-target");
 let editingHour = null;
 let journeys = loadJourneys();
 let downtimeByJourney = loadDowntimeRecords();
+let targetsByJourney = loadTargets();
 let activeLine = lineSelect.value;
 let activeShift = shiftSelect.value;
 let activeDate = getJourneyDate(activeShift);
@@ -44,6 +48,17 @@ function loadJourneys() {
 function loadDowntimeRecords() {
   try {
     const saved = JSON.parse(localStorage.getItem(downtimeStorageKey) || "{}");
+    return saved && typeof saved === "object" && !Array.isArray(saved)
+      ? saved
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function loadTargets() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(targetStorageKey) || "{}");
     return saved && typeof saved === "object" && !Array.isArray(saved)
       ? saved
       : {};
@@ -82,6 +97,10 @@ function getDowntimeRecords() {
 
 function saveDowntimeRecords() {
   localStorage.setItem(downtimeStorageKey, JSON.stringify(downtimeByJourney));
+}
+
+function saveTargets() {
+  localStorage.setItem(targetStorageKey, JSON.stringify(targetsByJourney));
 }
 
 function formatTime(hour) {
@@ -258,6 +277,71 @@ function renderDowntime() {
     .join("");
 }
 
+function renderGoal(entries, good) {
+  const key = getJourneyKey();
+  const target = targetsByJourney[key];
+  const validTarget =
+    Number.isSafeInteger(target) && target > 0 ? target : null;
+  const performance = productionCalculations.calculateTargetPerformance(
+    good,
+    validTarget,
+  );
+  const progressCard = document.querySelector(".goal-progress-card");
+  const status = document.querySelector("#target-status");
+  const progressBar = document.querySelector("#target-progressbar");
+  const progress = document.querySelector("#target-progress");
+  const targetSummary = document.querySelector("#executive-summary");
+
+  targetInput.value = validTarget ?? "";
+  document.querySelector("#target-actual").textContent =
+    good.toLocaleString("es");
+  document.querySelector("#target-display").textContent =
+    validTarget?.toLocaleString("es") ?? "—";
+
+  if (!performance) {
+    progressCard.dataset.state = "pending";
+    status.textContent = "Sin meta definida";
+    document.querySelector("#target-detail").textContent =
+      "Ingresa una meta para medir el avance.";
+    document.querySelector("#target-percentage").textContent = "—";
+    document.querySelector("#target-remaining").textContent = "—";
+    progress.style.width = "0%";
+    progressBar.setAttribute("aria-valuenow", "0");
+  } else {
+    const percent = performance.percentage;
+    progressCard.dataset.state = performance.achieved ? "achieved" : "in-progress";
+    status.textContent = performance.achieved ? "Meta alcanzada" : "En progreso";
+    document.querySelector("#target-detail").textContent = performance.achieved
+      ? `Meta superada por ${(good - validTarget).toLocaleString("es")} piezas.`
+      : `Faltan ${performance.remaining.toLocaleString("es")} piezas buenas.`;
+    document.querySelector("#target-percentage").textContent =
+      `${percent.toLocaleString("es", { maximumFractionDigits: 1 })}%`;
+    document.querySelector("#target-remaining").textContent =
+      performance.remaining.toLocaleString("es");
+    progress.style.width = `${Math.min(percent, 100)}%`;
+    progressBar.setAttribute("aria-valuenow", String(Math.min(percent, 100)));
+  }
+
+  const defect = productionCalculations.calculateDefectBreakdown(entries)[0];
+  const downtime = productionCalculations.calculateDowntimeSummary(
+    getDowntimeRecords(),
+  ).byReason[0];
+  const highlights = [];
+  if (defect) {
+    highlights.push(
+      `Principal defecto: ${defect.label} (${defect.count.toLocaleString("es")} piezas).`,
+    );
+  }
+  if (downtime) {
+    highlights.push(
+      `Mayor causa de paro: ${downtime.label} (${formatDuration(downtime.minutes)}).`,
+    );
+  }
+  targetSummary.textContent = highlights.length
+    ? highlights.join(" ")
+    : "Sin scrap ni paros registrados en esta jornada.";
+}
+
 function render() {
   const shift = shiftDefinitions[activeShift];
   const entries = getEntries();
@@ -310,6 +394,7 @@ function render() {
 
   renderAnalysis(entries);
   renderDowntime();
+  renderGoal(entries, totals.good);
 }
 
 function renderRow(index, entry) {
@@ -342,6 +427,25 @@ shiftSelect.addEventListener("change", () => {
   activeDate = getJourneyDate(activeShift);
   editingHour = null;
   render();
+});
+
+targetForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const target = Number(targetInput.value);
+  targetInput.setCustomValidity(
+    Number.isSafeInteger(target) && target > 0
+      ? ""
+      : "Ingresa una meta entera mayor que cero.",
+  );
+  if (!targetForm.reportValidity()) return;
+
+  targetsByJourney[getJourneyKey()] = target;
+  saveTargets();
+  render();
+});
+
+targetInput.addEventListener("input", () => {
+  targetInput.setCustomValidity("");
 });
 
 downtimeForm.querySelector('[name="reason"]').innerHTML =
@@ -451,8 +555,10 @@ document.querySelector("#confirm-clear").addEventListener("click", (event) => {
   event.preventDefault();
   delete journeys[getJourneyKey()];
   delete downtimeByJourney[getJourneyKey()];
+  delete targetsByJourney[getJourneyKey()];
   saveJourneys();
   saveDowntimeRecords();
+  saveTargets();
   editingHour = null;
   dialog.close();
   render();

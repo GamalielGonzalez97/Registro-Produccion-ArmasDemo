@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f3f5f2" />
+    <meta name="theme-color" content="#0b1730" />
     <title>Control de Producción</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -136,6 +136,65 @@
               <span id="scrap-bar"></span>
             </div>
           </article>
+        </section>
+
+        <section class="goal-section" aria-labelledby="goal-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">RESUMEN EJECUTIVO</p>
+              <h2 id="goal-title">Cumplimiento de la meta</h2>
+            </div>
+          </div>
+          <div class="goal-layout">
+            <form id="target-form" class="target-form">
+              <label for="production-target">Meta de piezas buenas</label>
+              <div class="target-input-row">
+                <input
+                  id="production-target"
+                  name="target"
+                  type="number"
+                  min="1"
+                  step="1"
+                  inputmode="numeric"
+                  placeholder="Ej. 1600"
+                  aria-describedby="target-note"
+                  required
+                />
+                <button class="button button-save" type="submit">
+                  Guardar meta
+                </button>
+              </div>
+              <p id="target-note">Meta independiente por línea y turno.</p>
+            </form>
+            <div class="goal-progress-card" aria-live="polite">
+              <div class="goal-progress-heading">
+                <div>
+                  <span class="goal-status" id="target-status">Sin meta definida</span>
+                  <p id="target-detail">Ingresa una meta para medir el avance.</p>
+                </div>
+                <strong id="target-percentage">—</strong>
+              </div>
+              <div
+                class="goal-progress-track"
+                id="target-progressbar"
+                role="progressbar"
+                aria-label="Cumplimiento de la meta de piezas buenas"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              >
+                <span id="target-progress"></span>
+              </div>
+              <div class="goal-stats">
+                <span>Meta <strong id="target-display">—</strong></span>
+                <span>Piezas buenas <strong id="target-actual">0</strong></span>
+                <span>Faltantes <strong id="target-remaining">—</strong></span>
+              </div>
+              <p class="executive-summary" id="executive-summary">
+                Registra producción y paros para generar el resumen del turno.
+              </p>
+            </div>
+          </div>
         </section>
 
         <section class="analysis-panel" aria-labelledby="analysis-title">

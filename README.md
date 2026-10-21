@@ -8,6 +8,7 @@ Aplicación web de demostración para registrar y consultar la producción de un
 - [x] **Paso 2 — Clasificación de scrap:** selección del tipo de defecto en cada hora, visible en la tabla y conservada al editar o recargar.
 - [x] **Paso 3 — Análisis de turno:** resumen del rendimiento, desglose por defecto y comparación por hora para detectar tendencias de calidad.
 - [x] **Paso 4 — Registro de paros:** captura de horarios, causa, responsable y detalle, con duración total por jornada.
+- [x] **Paso 5 — Cumplimiento de meta:** seguimiento de piezas buenas contra una meta configurable por línea, fecha y turno, con resumen ejecutivo de defectos y paros.
 - [x] **Mejora móvil:** campos numéricos y selector de defecto con controles grandes y diseño adaptable.
 
 ## Funcionalidades
@@ -23,8 +24,14 @@ Aplicación web de demostración para registrar y consultar la producción de un
 - Confirmación antes de limpiar los registros de la jornada seleccionada.
 - Registro de tipo de defecto asociado a cada hora de scrap para identificar la causa de la no conformidad.
 - Registro de paros de línea por jornada, con duración calculada, causa, responsable y detalle.
+- Configuración de una meta de piezas buenas por jornada y visualización de avance, piezas faltantes y cumplimiento.
+- Resumen ejecutivo con el defecto que más piezas scrap genera y la causa que acumula más tiempo de paro.
 
 ## Cambios recientes
+
+### 2026-10-20 — Paso 5: cumplimiento de meta
+
+Se agregó una meta editable de piezas buenas para cada combinación de línea, fecha y turno. El tablero muestra el porcentaje de cumplimiento, las piezas restantes o la cantidad que superó la meta, además de resumir el principal defecto y la causa de paro con mayor duración.
 
 ### 2026-10-16 — Paso 4: registro de paros
 
@@ -99,4 +106,4 @@ git reset --hard HEAD~1
 
 ## Alcance y limitaciones
 
-Esta versión es únicamente una demo de interfaz y funcionamiento local. No incluye backend, base de datos central, inicio de sesión, permisos, exportación ni sincronización entre dispositivos. Los datos pertenecen al navegador y dispositivo donde se capturan; limpiar los datos del navegador puede eliminarlos. La opción **Finalizar y limpiar jornada** elimina los registros del turno y fecha seleccionados en ese dispositivo.
+Esta versión es únicamente una demo de interfaz y funcionamiento local. No incluye backend, base de datos central, inicio de sesión, permisos, exportación ni sincronización entre dispositivos. Los datos y metas pertenecen al navegador y dispositivo donde se capturan; limpiar los datos del navegador puede eliminarlos. La opción **Finalizar y limpiar jornada** elimina la producción, los paros y la meta del turno, fecha y línea seleccionados en ese dispositivo.
